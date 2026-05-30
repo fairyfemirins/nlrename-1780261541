@@ -1,51 +1,43 @@
 #!/usr/bin/env python3
 """
-Unit tests for nlrename.py
-Run with: pytest tests/
+Test suite for nlrename.
 """
 
 import os
-import pytest
+import tempfile
+import unittest
 from datetime import datetime
-from nlrename import NaturalLanguageRenamer
+from pathlib import Path
+
+from nlrename import parse_expression
 
 
-def test_parse_instruction_date():
-    renamer = NaturalLanguageRenamer("add today's date to all files")
-    parsed = renamer.parse_instruction()
-    assert parsed["action"] == "date"
-    assert parsed["target"] == "all"
+class TestNLRename(unittest.TestCase):
+    def setUp(self):
+        self.test_dir = tempfile.TemporaryDirectory()
+        self.test_file = Path(self.test_dir.name) / "test.txt"
+        self.test_file.write_text("test content")
 
+    def tearDown(self):
+        self.test_dir.cleanup()
 
-def test_parse_instruction_case():
-    renamer = NaturalLanguageRenamer("all files to lowercase")
-    parsed = renamer.parse_instruction()
-    assert parsed["action"] == "case"
-    assert parsed["case"] == "lowercase"
+    def test_todays_date(self):
+        today = datetime.now().strftime("%Y-%m-%d")
+        result = parse_expression("today's date", "test.txt")
+        self.assertEqual(result, f"{today}_test.txt")
 
+    def test_lowercase(self):
+        result = parse_expression("lowercase", "TEST.TXT")
+        self.assertEqual(result, "test.txt")
 
-def test_parse_instruction_replace():
-    renamer = NaturalLanguageRenamer("replace 'draft' with 'final'")
-    parsed = renamer.parse_instruction()
-    assert parsed["action"] == "replace"
-    assert parsed["pattern"] == "draft"
-    assert parsed["replacement"] == "final"
+    def test_uppercase(self):
+        result = parse_expression("uppercase", "test.txt")
+        self.assertEqual(result, "TEST.TXT")
 
-
-def test_generate_new_name_date(tmp_path):
-    today = datetime.now().strftime("%Y-%m-%d")
-    renamer = NaturalLanguageRenamer("add today's date")
-    parsed = renamer.parse_instruction()
-    new_name = renamer.generate_new_name("report.pdf", parsed)
-    assert new_name == f"{today}_report.pdf"
-
-
-def test_generate_new_name_case(tmp_path):
-    renamer = NaturalLanguageRenamer("all files to lowercase")
-    parsed = renamer.parse_instruction()
-    new_name = renamer.generate_new_name("DRAFT_REPORT.PDF", parsed)
-    assert new_name == "draft_report.pdf"
+    def test_replace(self):
+        result = parse_expression('replace "test" with "demo"', "test.txt")
+        self.assertEqual(result, "demo.txt")
 
 
 if __name__ == "__main__":
-    pytest.main(["-v", __file__])
+    unittest.main()
