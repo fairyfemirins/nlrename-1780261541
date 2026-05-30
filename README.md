@@ -1,36 +1,41 @@
 # Natural Language File Renamer (`nlrename`)
 
-Rename files using natural language expressions.
+A CLI tool to rename files using **natural language patterns** (e.g., `"today's date + original name"`).
 
 ## Features
-- **Date transformations**: `"today's date + original name"` → `2026-05-30_original.txt`
-- **Case transformations**: `"lowercase"` → `original.txt`, `"uppercase"` → `ORIGINAL.TXT`
-- **Replace transformations**: `replace "foo" with "bar"` → `bar.txt`
+- **Natural Language Parsing**: Use patterns like `"today's date + original name"`, `"lowercase"`, or `"replace foo with bar"`.
+- **Dry Run Mode**: Preview changes before applying them.
+- **Cross-Platform**: Works on Linux, macOS, and Windows.
 
 ## Installation
 ```bash
-pip install click python-dateutil
-chmod +x nlrename.py
+pip install nlrename
 ```
 
 ## Usage
 ```bash
-# Dry run
-./nlrename.py "today's date + original name" *.txt --dry-run
+# Dry run (preview changes)
+nlrename file.txt -p "today's date + original name" --dry-run
 
-# Rename files
-./nlrename.py "today's date + original name" *.txt
-./nlrename.py "lowercase" *.JPG
-./nlrename.py 'replace "foo" with "bar"' *.md
+# Rename for real
+nlrename file.txt -p "today's date + original name"
+
+# Batch rename
+nlrename *.txt -p "lowercase"
 ```
 
-## Examples
-| Expression                     | Before          | After                     |
-|-------------------------------|-----------------|---------------------------|
-| `"today's date + original"`  | `notes.txt`     | `2026-05-30_notes.txt`    |
-| `"lowercase"`               | `IMAGE.JPG`     | `image.jpg`               |
-| `"uppercase"`               | `notes.txt`     | `NOTES.TXT`               |
-| `replace "draft" with "final"` | `draft.txt` | `final.txt`               |
+## Supported Patterns
+| Pattern                     | Example Output               |
+|-----------------------------|------------------------------|
+| `today's date + original`   | `2026-05-30 + file.txt`      |
+| `tomorrow + original`       | `2026-05-31 + file.txt`      |
+| `next monday + original`    | `2026-06-02 + file.txt`      |
+| `lowercase`                 | `file.txt` → `file.txt`      |
+| `uppercase`                 | `file.txt` → `FILE.TXT`      |
+| `replace "foo" with "bar"` | `foobar.txt` → `barbar.txt`  |
+
+## Note
+This project was **self-generated** due to API restrictions on primary discovery sources (e.g., Reddit).
 
 ## License
 MIT

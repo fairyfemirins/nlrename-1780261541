@@ -1,2 +1,2 @@
 [console_scripts]
-nlrename = nlrename:cli
+nlrename = nlrename.cli:main
