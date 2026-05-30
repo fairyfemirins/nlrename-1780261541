@@ -39,5 +39,12 @@ pip install click python-dateutil regex
 ## Note
 This project was self-generated due to API restrictions on primary discovery sources (e.g., Reddit).
 
+## Transfer Instructions
+This repository was published under `fairyfemirins/nlrename-1780166809` due to namespace restrictions in cron mode.
+To transfer to `femirins/nlrename`:
+1. Go to: [Repository Settings](https://github.com/fairyfemirins/nlrename-1780166809/settings)
+2. Under "Danger Zone", select "Transfer repository".
+3. Enter `femirins/nlrename` as the new owner.
+
 ## License
 MIT
