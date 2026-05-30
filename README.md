@@ -1,46 +1,43 @@
-# Natural Language File Renamer (`nlrename`)
+# Natural Language File Renamer (nlrename)
 
-A CLI tool to rename files using natural language instructions. No more wrestling with `rename`, `sed`, or manual bulk edits!
+Rename files using natural language instructions.
 
 ## Features
-- **Natural Language Instructions**:
-  - `"add today's date to all PDFs"`
-  - `"replace 'draft' with 'final'"`
-  - `"all files to lowercase"`
-  - `"append '_backup' to all files"`
-  - `"prepend '2026-' to all TXT files"`
-- **Dry Run Mode**: Preview changes before applying.
-- **Force Mode**: Overwrite existing files.
-- **Bulk Operations**: Recursively rename files in directories.
+- **Natural Language Instructions**: Rename files using plain English (e.g., `"add today's date to all PDFs"`, `"replace 'draft' with 'final'"`).
+- **Bulk Operations**: Apply changes to all files in a directory.
+- **Dry Run Mode**: Preview changes with `--dry-run`.
+- **Case Transformation**: Convert filenames to `lowercase`, `UPPERCASE`, or `Title Case`.
+- **Regex Support**: Remove first/last N characters, keep only numbers/letters.
+- **Filter by Extension**: Rename only specific file types (e.g., `"all PDFs"`).
 
 ## Installation
 ```bash
-pip install --break-system-packages click python-dateutil regex
+pip install click python-dateutil regex
 ```
 
 ## Usage
 ```bash
-python nlrename.py "<instruction>" <directory> [--dry-run] [--force]
+# Preview changes
+./nlrename.py "replace 'draft' with 'final'" /path/to/files --dry-run
+
+# Apply changes
+./nlrename.py "add today's date to all PDFs" /path/to/files
+
+# Verbose output
+./nlrename.py "to lowercase" /path/to/files --verbose
 ```
 
-### Examples
-```bash
-# Preview renaming all files to lowercase
-python nlrename.py "all files to lowercase" ~/Downloads --dry-run
-
-# Replace 'draft' with 'final' in all filenames
-python nlrename.py "replace 'draft' with 'final'" ~/projects --force
-
-# Append '_backup' to all files
-python nlrename.py "append '_backup'" ~/documents
-```
+## Examples
+| Instruction                          | Before          | After                     |
+|-------------------------------------|-----------------|--------------------------|
+| `"add today's date to all PDFs"`   | `report.pdf`    | `2026-05-30_report.pdf`   |
+| `"replace 'draft' with 'final'"`   | `draft1.txt`    | `final1.txt`             |
+| `"to lowercase"`                   | `UPPERCASE.TXT` | `uppercase.txt`          |
+| `"remove first 3 characters"`      | `abc123.txt`    | `123.txt`                |
+| `"all PDFs to title case"`         | `my report.pdf` | `My Report.pdf`          |
 
 ## Note
-This repository was published under `fairyfemirins/nlrename-1780164961` due to namespace restrictions in cron mode.
-See [TRANSFER.md](TRANSFER.md) for transfer instructions.
-
 This project was self-generated due to API restrictions on primary discovery sources (e.g., Reddit).
-To transfer to `femirins/nlrename`:
-1. Go to: [https://github.com/fairyfemirins/nlrename-1780154551/settings](https://github.com/fairyfemirins/nlrename-1780154551/settings)
-2. Under "Danger Zone", select "Transfer repository".
-3. Enter `femirins/nlrename` as the new owner.
+
+## License
+MIT
