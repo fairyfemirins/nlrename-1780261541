@@ -48,7 +48,7 @@ nlrename "lowercase" *.TXT
 | `"today's date + original name"` | `notes.txt`     | `2026-05-31_notes.txt` |
 | `"sequential number + original name"` | `photo.jpg` | `1_photo.jpg`        |
 | `"regex(s/foo/bar/)"`        | `foo.txt`       | `bar.txt`            |
-| `"lowercase"`                | `FILE.TXT`      | `file.txt`           |
+| `"lowercase"`                | `FILE.TXT`      | `file.TXT`           |
 
 ## Development
 ```bash
