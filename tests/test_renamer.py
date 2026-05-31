@@ -1,1 +1,0 @@
-from renamer import parse_natural_language

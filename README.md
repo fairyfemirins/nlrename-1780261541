@@ -1,52 +1,67 @@
 # Natural Language File Renamer (nlrename)
 
-A CLI tool to batch-rename files using natural language commands.
+A Python CLI tool to rename files using natural language expressions (e.g., `"today's date + original name"`, `"lowercase + sequential number"`).
+
+## Why?
+- **No open-source Python CLI tool** exists for natural language file renaming.
+- **Regex-based tools** (e.g., `F2`, `nom`) require users to learn regex syntax.
+- **AI-powered tools** (e.g., `renaiming`) suggest names but do not support natural language expressions as input.
 
 ## Features
-- **Natural Language Parsing**: Rename files using commands like `"today's date + original name"`, `"lowercase"`, or `"replace 'old' with 'new'"`.
-- **Dry-Run Mode**: Preview changes before applying them.
-- **Verbose Output**: See exactly what will be renamed.
+- Rename files using natural language expressions:
+  - `"today's date + original name"` → `2026-05-31_original_name.txt`
+  - `"lowercase + sequential number"` → `file_1.txt`, `file_2.txt`
+  - `"uppercase + regex(s/foo/bar/)"` → `BAR.txt`
+- Preview changes before applying them.
+- Dry-run mode to test transformations.
+
+## Limitations
+- **Self-Generated Project**: This project was self-generated due to API restrictions on primary discovery sources (e.g., Reddit).
+- **Cron Mode Publishing**: Published under a timestamped repository name due to namespace restrictions. See [TRANSFER.md](TRANSFER.md) for transfer instructions.
 
 ## Installation
 ```bash
-pip install click python-dateutil
+pip install nlrename
 ```
 
 ## Usage
 ```bash
-# Dry-run: Preview changes
-nlrename "today's date + original name" --dry-run --verbose
+# Preview changes (dry-run)
+nlrename "today's date + original name" *.txt
 
 # Apply changes
-nlrename "lowercase"
+nlrename --apply "today's date + original name" *.txt
 
-# Replace text
-nlrename "replace 'old' with 'new'"
+# Sequential numbering
+nlrename "sequential number + original name" *.jpg
 
-# Add prefix/suffix
-nlrename "add prefix 'backup_'"
-nlrename "add suffix '_backup'"
+# Regex substitution
+nlrename "regex(s/foo/bar/)" *.txt
+
+# Lowercase
+nlrename "lowercase" *.TXT
 ```
 
 ## Examples
-| Command                          | Before          | After                |
-|---------------------------------|-----------------|----------------------|
-| `"today's date + original name"` | `myfile.txt`    | `2026-05-31_myfile.txt` |
-| `"lowercase"`                   | `MYFILE.TXT`    | `myfile.txt`          |
-| `"replace 'old' with 'new'"`    | `oldfile.txt`   | `newfile.txt`         |
-| `"add prefix 'backup_'"`        | `myfile.txt`    | `backup_myfile.txt`   |
+| Expression                     | Before          | After                |
+|-------------------------------|-----------------|----------------------|
+| `"today's date + original name"` | `notes.txt`     | `2026-05-31_notes.txt` |
+| `"sequential number + original name"` | `photo.jpg` | `1_photo.jpg`        |
+| `"regex(s/foo/bar/)"`        | `foo.txt`       | `bar.txt`            |
+| `"lowercase"`                | `FILE.TXT`      | `file.txt`           |
 
-## Note
-This project was self-generated due to API restrictions on primary discovery sources (e.g., Reddit). No open-source Python CLI tool existed for natural language file renaming at the time of development.
+## Development
+```bash
+# Clone the repository
+git clone https://github.com/fairyfemirins/nlrename-$(date +%s).git
+cd nlrename
+
+# Install dependencies
+pip install -e .
+
+# Run tests
+pytest
+```
 
 ## License
-MIT# Note
-
-This repository was published under "`fairyfemirins`" due to GitHub namespace restrictions in cron mode. A transfer to `Femirins` is pending.
-
-## Transfer Instructions
-
-To transfer this repository to `Femirins/nlrename`:
-1. Go to: [Repository Settings](https://github.com/fairyfemirins/nlrename-1780213954/settings)
-2. Under "Danger Zone", select "Transfer repository".
-3. Enter `Femirins` as the new owner and confirm.
+MIT
