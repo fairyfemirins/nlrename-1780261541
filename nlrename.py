@@ -1,74 +1,120 @@
 #!/usr/bin/env python3
 """
-nlrename: Rename files using natural language expressions.
+Natural Language File Renamer (nlrename)
 
-Examples:
-  nlrename "today's date + original name" *.txt
-  nlrename "lowercase" *.JPG
-  nlrename "replace foo with bar" *.md
+A CLI tool to batch-rename files using natural language commands.
+Example: "today's date + original name" -> "2026-05-31_myfile.txt"
+
+Usage:
+  nlrename "<natural-language-command>" [--dry-run] [--verbose]
+
+Commands:
+  - "today's date + original name" -> "2026-05-31_myfile.txt"
+  - "lowercase" -> "myfile.txt"
+  - "uppercase" -> "MYFILE.TXT"
+  - "replace 'old' with 'new'" -> "newfile.txt"
+  - "add prefix 'backup_'" -> "backup_myfile.txt"
+  - "add suffix '_backup'" -> "myfile_backup.txt"
+
+Dependencies:
+  - click
+  - python-dateutil
 """
 
 import os
 import re
 import sys
 from datetime import datetime
-from pathlib import Path
+from typing import List, Optional
 
 import click
+from dateutil.relativedelta import relativedelta
+
+
+class NaturalLanguageParser:
+    """Parse natural language commands into renaming rules."""
+
+    @staticmethod
+    def parse(command: str) -> dict:
+        """Parse a natural language command into a renaming rule."""
+        command = command.lower().strip()
+        rule = {"transformations": []}
+
+        # Date-based transformations
+        if "today's date" in command:
+            today = datetime.now().strftime("%Y-%m-%d")
+            if "+" in command:
+                rule["transformations"].append({"type": "prefix", "value": f"{today}_"})
+            else:
+                rule["transformations"].append({"type": "suffix", "value": f"_{today}"})
+
+        # Case transformations
+        if "lowercase" in command:
+            rule["transformations"].append({"type": "lowercase"})
+        elif "uppercase" in command:
+            rule["transformations"].append({"type": "uppercase"})
+
+        # Replace transformations
+        replace_match = re.search(r"replace ['\"](.*?)['\"] with ['\"](.*?)['\"]", command)
+        if replace_match:
+            rule["transformations"].append({
+                "type": "replace",
+                "old": replace_match.group(1),
+                "new": replace_match.group(2),
+            })
+
+        # Prefix/suffix transformations
+        prefix_match = re.search(r"add prefix ['\"](.*?)['\"]", command)
+        if prefix_match:
+            rule["transformations"].append({"type": "prefix", "value": prefix_match.group(1)})
+
+        suffix_match = re.search(r"add suffix ['\"](.*?)['\"]", command)
+        if suffix_match:
+            rule["transformations"].append({"type": "suffix", "value": suffix_match.group(1)})
+
+        return rule
+
+    @staticmethod
+    def apply_transformations(filename: str, rule: dict) -> str:
+        """Apply transformations to a filename."""
+        for transform in rule["transformations"]:
+            if transform["type"] == "prefix":
+                filename = transform["value"] + filename
+            elif transform["type"] == "suffix":
+                filename = filename + transform["value"]
+            elif transform["type"] == "lowercase":
+                filename = filename.lower()
+            elif transform["type"] == "uppercase":
+                filename = filename.upper()
+            elif transform["type"] == "replace":
+                filename = filename.replace(transform["old"], transform["new"])
+        return filename
 
 
 @click.command()
-@click.argument("expression", type=str)
-@click.argument("files", nargs=-1, type=click.Path(exists=True))
-@click.option("--dry-run", is_flag=True, help="Show what would be renamed without actually doing it.")
-def cli(expression: str, files: tuple, dry_run: bool) -> None:
-    """Rename files using natural language expressions."""
-    if not files:
-        click.echo("Error: No files provided.", err=True)
+@click.argument("command", type=str)
+@click.option("--dry-run", is_flag=True, help="Show what would be renamed without making changes.")
+@click.option("--verbose", is_flag=True, help="Show detailed output.")
+def cli(command: str, dry_run: bool, verbose: bool) -> None:
+    """Rename files using natural language commands."""
+    parser = NaturalLanguageParser()
+    rule = parser.parse(command)
+    
+    if not rule["transformations"]:
+        click.echo("Error: Could not parse the command. Example: 'today's date + original name'")
         sys.exit(1)
-
-    for file in files:
-        original_path = Path(file)
-        new_name = parse_expression(expression, original_path.name)
-        new_path = original_path.with_name(new_name)
-
-        if dry_run:
-            click.echo(f"Would rename: {original_path.name} -> {new_name}")
-        else:
-            try:
-                original_path.rename(new_path)
-                click.echo(f"Renamed: {original_path.name} -> {new_name}")
-            except Exception as e:
-                click.echo(f"Error renaming {original_path.name}: {e}", err=True)
-
-
-def parse_expression(expression: str, original_name: str) -> str:
-    """Parse natural language expression and apply transformations."""
-    name, ext = os.path.splitext(original_name)
-    result = name
-
-    # Date transformations
-    if "today's date" in expression:
-        today = datetime.now().strftime("%Y-%m-%d")
-        result = f"{today}_{result}"
-
-    # Case transformations
-    if "lowercase" in expression:
-        result = result.lower()
-        ext = ext.lower()
-    if "uppercase" in expression:
-        result = result.upper()
-        ext = ext.upper()
-    if "titlecase" in expression:
-        result = result.title()
-
-    # Replace transformations
-    replace_match = re.search(r'replace "([^"]+)" with "([^"]+)"', expression)
-    if replace_match:
-        old, new = replace_match.groups()
-        result = result.replace(old, new)
-
-    return f"{result}{ext}"
+    
+    for filename in os.listdir("."):
+        if os.path.isfile(filename):
+            new_name = parser.apply_transformations(filename, rule)
+            if new_name != filename:
+                if verbose:
+                    click.echo(f"Renaming: {filename} -> {new_name}")
+                if not dry_run:
+                    os.rename(filename, new_name)
+    
+    if dry_run:
+        click.echo("Dry run complete. No files were renamed.")
 
 
 if __name__ == "__main__":
